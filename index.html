@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Sports Odds</title>
+    <style>
+        /* Dark Mode Vibe Styling */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #ffffff; padding: 20px; }
+        .container { max-width: 800px; margin: auto; }
+        h1 { text-align: center; color: #4CAF50; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        
+        .game-card { background-color: #1e1e1e; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .teams { font-size: 1.4em; font-weight: bold; margin-bottom: 5px; text-align: center;}
+        .details { color: #aaaaaa; font-size: 0.9em; margin-bottom: 20px; text-align: center; }
+        
+        .odds-container { display: flex; gap: 10px; justify-content: space-between; }
+        .odd-box { background-color: #2c2c2c; padding: 15px; border-radius: 8px; text-align: center; flex: 1; border: 1px solid #444; transition: 0.2s;}
+        .odd-box:hover { background-color: #3c3c3c; border-color: #4CAF50; cursor: pointer; }
+        .odd-label { display: block; font-size: 0.85em; color: #bbb; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;}
+        .odd-value { font-weight: bold; font-size: 1.3em; color: #4CAF50; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 Live Match Odds</h1>
+        <div id="odds-list">Loading live odds from your server...</div>
+    </div>
+
+    <script>
+        // 🚨 IMPORTANT: Change this if your actual Main App URL is different!
+       const API_URL = 'https://main-betting-app.onrender.com/api/odds';
+
+        async function fetchOdds() {
+            try {
+                // 1. Call your Main App's public window
+                const response = await fetch(API_URL);
+                const games = await response.json();
+
+                
+                const listContainer = document.getElementById('odds-list');
+                listContainer.innerHTML = ''; // Clear the "Loading..." text
+
+                if (games.length === 0) {
+                    listContainer.innerHTML = '<p style="text-align:center;">No live games available right now.</p>';
+                    return;
+                }
+
+                // 2. Loop through the games and build HTML cards
+                games.forEach(game => {
+                    let oddsHtml = '<p style="text-align:center; color: #888;">Odds currently unavailable</p>';
+                    
+                    // Safely dig into The Odds API complex data structure
+                    try {
+                        if (game.oddsData && game.oddsData.length > 0) {
+                            // Grab the Home/Draw/Away (h2h) odds from the first bookmaker
+                            const market = game.oddsData[0].markets.find(m => m.key === 'h2h');
+                            if (market && market.outcomes) {
+                                oddsHtml = `
+                                    <div class="odds-container">
+                                        ${market.outcomes.map(outcome => `
+                                            <div class="odd-box">
+                                                <span class="odd-label">${outcome.name}</span>
+                                                <span class="odd-value">${outcome.price}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                `;
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Could not parse odds for a game");
+                    }
+
+                    // 3. Format the date to look nice
+                    const matchDate = new Date(game.matchDate).toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                    // 4. Assemble the card and put it on the screen
+                    const card = document.createElement('div');
+                    card.className = 'game-card';
+                    card.innerHTML = `
+                        <div class="teams">${game.homeTeam}  vs  ${game.awayTeam}</div>
+                        <div class="details">📅 ${matchDate} &nbsp;|&nbsp; ⚽ ${game.sport}</div>
+                        ${oddsHtml}
+                    `;
+                    
+                    listContainer.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error("Failed to load odds:", error);
+                document.getElementById('odds-list').innerHTML = '<p style="text-align:center; color: #ff5555;">Error connecting to your Main App. Is the server awake?</p>';
+            }
+        }
+
+        // Run the function immediately when the page opens
+        fetchOdds();
+    </script>
+</body>
+</html>
