@@ -159,14 +159,14 @@
                     feed.innerHTML = '<p style="text-align:center;">No live games available.</p>'; return;
                 }
 
-                // 🔥 1. FILTER: Only keep games happening in the next 7 days
+               // 🔥 1. FILTER: Only keep games happening in the next 30 days
                 const now = new Date();
-                const nextWeek = new Date();
-                nextWeek.setDate(now.getDate() + 7);
+                const futureDate = new Date();
+                futureDate.setDate(now.getDate() + 30); // Changed from 7 to 30!
                 
                 const validGames = allGames.filter(game => {
                     const matchDate = new Date(game.matchDate);
-                    return matchDate >= now && matchDate <= nextWeek;
+                    return matchDate >= now && matchDate <= futureDate;
                 });
 
                 // 🔥 2. GROUP: Organize games into folders by League (sport)
