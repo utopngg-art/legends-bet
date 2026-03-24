@@ -35,8 +35,16 @@
 
         /* Middle Feed */
         .feed { flex: 1; padding: 30px; overflow-y: auto; background-color: var(--bg-main); }
-        .feed-title { margin-top: 0; margin-bottom: 25px; font-size: 1.5em; border-bottom: 2px solid var(--border); padding-bottom: 10px;}
+        .feed-title { margin-top: 0; margin-bottom: 15px; font-size: 1.5em; border-bottom: 2px solid var(--border); padding-bottom: 10px;}
         
+        /* 🔥 THE PROMO CAROUSEL CSS 🔥 */
+        .carousel-container { position: relative; width: 100%; height: 160px; border-radius: 12px; overflow: hidden; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid var(--border); }
+        .carousel-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 0.8s ease-in-out; display: flex; align-items: center; padding: 0 40px; box-sizing: border-box; background-size: cover; background-position: center;}
+        .carousel-slide.active { opacity: 1; z-index: 10; }
+        .promo-content h3 { margin: 0 0 8px 0; font-size: 1.8em; color: white; text-transform: uppercase; font-style: italic; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);}
+        .promo-content p { margin: 0; color: #f8fafc; font-size: 1.1em; font-weight: bold; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);}
+        
+        /* Game Cards */
         .game-card { background-color: var(--bg-card); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 1px solid var(--border); }
         .match-header { display: flex; justify-content: space-between; color: var(--text-sub); font-size: 0.85em; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px;}
         .teams { font-size: 1.2em; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
@@ -50,7 +58,6 @@
         .odd-name { color: var(--text-sub); font-size: 0.85em; pointer-events: none; text-align: center;}
         .odd-price { font-weight: bold; font-size: 1.2em; color: var(--accent); pointer-events: none;}
 
-        /* Expand Markets Button */
         .expand-btn { width: 100%; background: none; border: none; color: var(--text-sub); padding: 10px; cursor: pointer; font-size: 0.9em; border-top: 1px solid var(--border); margin-top: 10px; transition: 0.2s; }
         .expand-btn:hover { color: white; }
         .extra-markets { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border); }
@@ -97,18 +104,41 @@
             </ul>
         </div>
 
-        <div class="feed" id="games-feed">
+        <div class="feed" id="main-feed-area">
+            
+            <div class="carousel-container">
+                <div class="carousel-slide active" style="background: linear-gradient(45deg, #0f172a, #10b981);">
+                    <div class="promo-content">
+                        <h3>🔥 100% Deposit Match</h3>
+                        <p>Double your bankroll up to $500 on your first deposit!</p>
+                    </div>
+                </div>
+                <div class="carousel-slide" style="background: linear-gradient(45deg, #0f172a, #3b82f6);">
+                    <div class="promo-content">
+                        <h3>🏆 Champions League</h3>
+                        <p>Boosted odds on all weekend soccer matches.</p>
+                    </div>
+                </div>
+                <div class="carousel-slide" style="background: linear-gradient(45deg, #0f172a, #ef4444);">
+                    <div class="promo-content">
+                        <h3>🛡️ Parlay Insurance</h3>
+                        <p>Get your stake back if exactly one leg loses!</p>
+                    </div>
+                </div>
+            </div>
+
             <h2 class="feed-title">Live Matches</h2>
-            <p style="text-align:center; color: #94a3b8; margin-top: 40px;">Loading secure odds...</p>
+            
+            <div id="games-feed">
+                <p style="text-align:center; color: #94a3b8; margin-top: 40px;">Loading secure odds...</p>
+            </div>
         </div>
 
         <div class="sidebar-right">
             <h2 class="betslip-header">🧾 Betslip</h2>
-            
             <div class="slip-items" id="slip-items">
                 <div class="empty-slip">Your betslip is empty.<br>Click on odds to build your parlay!</div>
             </div>
-            
             <div class="calculator">
                 <div class="calc-row">
                     <span>Type:</span>
@@ -132,6 +162,19 @@
     </div>
 
     <script>
+        // 🔥 THE CAROUSEL JAVASCRIPT LOGIC 🔥
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.carousel-slide');
+        
+        // This timer runs every 5000 milliseconds (5 seconds)
+        setInterval(() => {
+            slides[currentSlide].classList.remove('active'); // Hide current
+            currentSlide = (currentSlide + 1) % slides.length; // Move to next
+            slides[currentSlide].classList.add('active'); // Show next
+        }, 5000);
+
+
+        // --- YOUR DATA FETCHING CODE ---
         const API_URL = 'https://main-betting-app.onrender.com/api/odds';
         let betslip = []; 
 
@@ -140,10 +183,10 @@
                 const response = await fetch(API_URL);
                 const games = await response.json();
                 const feed = document.getElementById('games-feed');
-                feed.innerHTML = '<h2 class="feed-title">Live Matches</h2>'; 
+                feed.innerHTML = ''; 
 
                 if (games.length === 0) {
-                    feed.innerHTML += '<p style="text-align:center;">No live games available.</p>'; return;
+                    feed.innerHTML = '<p style="text-align:center;">No live games available.</p>'; return;
                 }
 
                 games.forEach(game => {
@@ -155,13 +198,10 @@
                     if (game.oddsData && game.oddsData.length > 0) {
                         const h2h = game.oddsData[0].markets.find(m => m.key === 'h2h');
                         if (h2h && h2h.outcomes) {
-                            
-                            // 🔥 THE FIX: Force the array to sort Home -> Draw -> Away
                             const homeOutcome = h2h.outcomes.find(o => o.name === game.homeTeam);
                             const drawOutcome = h2h.outcomes.find(o => o.name === 'Draw');
                             const awayOutcome = h2h.outcomes.find(o => o.name === game.awayTeam);
                             
-                            // Only build the row if we actually found the odds
                             if(homeOutcome && drawOutcome && awayOutcome) {
                                 const sortedOutcomes = [
                                     { ...homeOutcome, label: "1 (Home)" }, 
@@ -187,8 +227,7 @@
                             }
                         }
 
-                        // 🔥 CHECK FOR TOTALS (Over/Under)
-                        // This will remain blank until we update the Demo Worker!
+                        // Check for totals (Over/Under)
                         const totals = game.oddsData[0].markets.find(m => m.key === 'totals');
                         if (totals && totals.outcomes) {
                             extraMarketsHtml = `
