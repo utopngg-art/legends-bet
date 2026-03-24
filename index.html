@@ -178,7 +178,7 @@
         const API_URL = 'https://main-betting-app.onrender.com/api/odds';
         let betslip = []; 
 
-        async function fetchOdds() {
+      async function fetchOdds() {
             try {
                 const response = await fetch(API_URL);
                 const games = await response.json();
@@ -191,12 +191,24 @@
 
                 games.forEach(game => {
                     let h2hHtml = '<p style="text-align:center; color:#555;">Odds locked</p>';
-                    let extraMarketsHtml = '<p style="text-align:center; color: var(--accent); font-size: 0.9em;">Awaiting backend update for Over/Under markets...</p>';
+                    // 🔥 UPDATED FALLBACK MESSAGE
+                    let extraMarketsHtml = '<p style="text-align:center; color: var(--text-sub); font-size: 0.9em;">Over/Under odds not yet released by bookmakers for this match.</p>';
+                    
                     let matchTitle = `${game.homeTeam} vs ${game.awayTeam}`;
                     let safeMatchId = matchTitle.replace(/[^a-zA-Z0-9]/g, ""); 
                     
                     if (game.oddsData && game.oddsData.length > 0) {
-                        const h2h = game.oddsData[0].markets.find(m => m.key === 'h2h');
+                        
+                        // 🔥 THE FIX: Search ALL bookmakers for the odds, not just the first one!
+                        let h2h = null;
+                        let totals = null;
+                        
+                        for (let bookie of game.oddsData) {
+                            if (!h2h) h2h = bookie.markets.find(m => m.key === 'h2h');
+                            if (!totals) totals = bookie.markets.find(m => m.key === 'totals');
+                        }
+
+                        // 1. Build Match Winner Odds
                         if (h2h && h2h.outcomes) {
                             const homeOutcome = h2h.outcomes.find(o => o.name === game.homeTeam);
                             const drawOutcome = h2h.outcomes.find(o => o.name === 'Draw');
@@ -227,16 +239,15 @@
                             }
                         }
 
-                        // Check for totals (Over/Under)
-                        const totals = game.oddsData[0].markets.find(m => m.key === 'totals');
+                        // 2. Build Over/Under Odds
                         if (totals && totals.outcomes) {
                             extraMarketsHtml = `
                                 <div class="market-title">Total Goals (Over/Under 2.5)</div>
                                 <div class="odds-row">
                                     ${totals.outcomes.map(outcome => {
                                         let pickName = `${outcome.name} ${outcome.point}`;
-                                        let safePickId = pickName.replace(/[^a-zA-Z0-9]/g, "");
-                                        let btnId = `btn-${safeMatchId}-${safePickId}`;
+                                        let safePickId = pickName.replace(/[^a-zA-Z0-9\. ]/g, ""); // made ID safer
+                                        let btnId = `btn-totals-${safeMatchId}-${safePickId}`;
                                         return `
                                         <button id="${btnId}" class="odd-btn" onclick="toggleBet('${matchTitle}', '${pickName}', ${outcome.price}, '${btnId}')">
                                             <span class="odd-name">${outcome.name} ${outcome.point}</span>
