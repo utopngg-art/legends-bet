@@ -3,97 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Sports Odds</title>
+    <title>LEGENDS BET | Premium Sportsbook</title>
     <style>
-        /* Dark Mode Vibe Styling */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #ffffff; padding: 20px; }
-        .container { max-width: 800px; margin: auto; }
-        h1 { text-align: center; color: #4CAF50; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        /* Professional Dark Theme */
+        :root {
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --accent: #10b981; /* Winning Green */
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+        }
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-main); color: var(--text-main); margin: 0; padding: 0; }
         
-        .game-card { background-color: #1e1e1e; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        .teams { font-size: 1.4em; font-weight: bold; margin-bottom: 5px; text-align: center;}
-        .details { color: #aaaaaa; font-size: 0.9em; margin-bottom: 20px; text-align: center; }
+        /* The Professional Header */
+        header { background-color: #0b1120; padding: 15px 30px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e293b; position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 1.8em; font-weight: 900; color: var(--accent); letter-spacing: 1px; }
+        .logo span { color: white; }
         
-        .odds-container { display: flex; gap: 10px; justify-content: space-between; }
-        .odd-box { background-color: #2c2c2c; padding: 15px; border-radius: 8px; text-align: center; flex: 1; border: 1px solid #444; transition: 0.2s;}
-        .odd-box:hover { background-color: #3c3c3c; border-color: #4CAF50; cursor: pointer; }
-        .odd-label { display: block; font-size: 0.85em; color: #bbb; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;}
-        .odd-value { font-weight: bold; font-size: 1.3em; color: #4CAF50; }
+        /* The Sport Tabs */
+        .sport-tabs { display: flex; gap: 20px; }
+        .tab { background: none; border: none; color: var(--text-sub); font-size: 1em; font-weight: bold; cursor: pointer; padding: 8px 12px; transition: 0.3s; text-transform: uppercase; }
+        .tab:hover, .tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+
+        /* The Main Layout (Grid) */
+        .layout { display: flex; max-width: 1200px; margin: 30px auto; gap: 20px; padding: 0 20px; }
+        .feed { flex: 2; }
+        
+        /* Game Cards */
+        .game-card { background-color: var(--bg-card); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 1px solid #2a3548; }
+        .match-header { display: flex; justify-content: space-between; color: var(--text-sub); font-size: 0.85em; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .teams { font-size: 1.2em; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .odds-row { display: flex; gap: 10px; }
+        .odd-btn { flex: 1; background-color: #0f172a; border: 1px solid #334155; padding: 12px; border-radius: 8px; color: white; cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center;}
+        .odd-btn:hover { border-color: var(--accent); background-color: var(--bg-hover); }
+        .odd-name { color: var(--text-sub); font-size: 0.9em; }
+        .odd-price { font-weight: bold; font-size: 1.1em; color: var(--accent); }
+
+        /* The Bet Calculator (Betslip) */
+        .betslip-container { flex: 1; }
+        .betslip { background-color: var(--bg-card); border-radius: 12px; padding: 20px; position: sticky; top: 90px; border: 1px solid #2a3548;}
+        .betslip h2 { margin-top: 0; font-size: 1.2em; border-bottom: 1px solid #334155; padding-bottom: 10px;}
+        .empty-slip { color: var(--text-sub); text-align: center; padding: 20px 0; font-size: 0.9em; }
+        
+        .selected-bet { background-color: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid var(--accent);}
+        .bet-match { font-size: 0.85em; color: var(--text-sub); margin-bottom: 5px; }
+        .bet-pick { font-weight: bold; font-size: 1em; display: flex; justify-content: space-between; }
+        
+        .calculator { margin-top: 20px; padding-top: 15px; border-top: 1px solid #334155; }
+        .calc-row { display: flex; justify-content: space-between; margin-bottom: 10px; align-items: center; }
+        .stake-input { background-color: #0f172a; border: 1px solid #334155; color: white; padding: 10px; border-radius: 6px; width: 80px; text-align: right; font-size: 1em; outline: none; }
+        .stake-input:focus { border-color: var(--accent); }
+        .win-amount { color: var(--accent); font-weight: bold; font-size: 1.2em; }
+        .place-bet-btn { width: 100%; background-color: var(--accent); color: #000; font-weight: bold; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1em; margin-top: 10px; transition: 0.2s;}
+        .place-bet-btn:hover { background-color: #0ea5e9; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🏆 Live Match Odds</h1>
-        <div id="odds-list">Loading live odds from your server...</div>
+
+    <header>
+        <div class="logo">LEGENDS<span>BET</span></div>
+        <div class="sport-tabs">
+            <button class="tab active">Football</button>
+            <button class="tab">Basketball</button>
+            <button class="tab">Tennis</button>
+            <button class="tab">Volleyball</button>
+            <button class="tab">Rugby</button>
+        </div>
+    </header>
+
+    <div class="layout">
+        <div class="feed" id="games-feed">
+            <p style="text-align:center; color: #94a3b8; margin-top: 40px;">Loading live odds from your secure server...</p>
+        </div>
+
+        <div class="betslip-container">
+            <div class="betslip">
+                <h2>🧾 Your Betslip</h2>
+                <div id="slip-items">
+                    <div class="empty-slip">Click on any odds to add them to your betslip.</div>
+                </div>
+                
+                <div class="calculator">
+                    <div class="calc-row">
+                        <span>Total Odds:</span>
+                        <span id="total-odds" style="font-weight: bold;">0.00</span>
+                    </div>
+                    <div class="calc-row">
+                        <span>Stake ($):</span>
+                        <input type="number" id="stake" class="stake-input" value="10" min="1" oninput="calculateWin()">
+                    </div>
+                    <div class="calc-row" style="margin-top: 15px;">
+                        <span>Potential Win:</span>
+                        <span id="potential-win" class="win-amount">$0.00</span>
+                    </div>
+                    <button class="place-bet-btn" onclick="alert('This is a demo! But your math works perfectly.')">Place Bet</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // 🚨 IMPORTANT: Change this if your actual Main App URL is different!
-       const API_URL = 'https://main-betting-app.onrender.com/api/odds';
+        // Your existing secure connection
+        const API_URL = 'https://main-betting-app.onrender.com/api/odds';
+        
+        // This is where we store the user's clicks!
+        let currentBet = null; 
 
         async function fetchOdds() {
             try {
-                // 1. Call your Main App's public window
                 const response = await fetch(API_URL);
                 const games = await response.json();
-
-                
-                const listContainer = document.getElementById('odds-list');
-                listContainer.innerHTML = ''; // Clear the "Loading..." text
+                const feed = document.getElementById('games-feed');
+                feed.innerHTML = ''; 
 
                 if (games.length === 0) {
-                    listContainer.innerHTML = '<p style="text-align:center;">No live games available right now.</p>';
-                    return;
+                    feed.innerHTML = '<p class="empty-slip">No live games available.</p>'; return;
                 }
 
-                // 2. Loop through the games and build HTML cards
                 games.forEach(game => {
-                    let oddsHtml = '<p style="text-align:center; color: #888;">Odds currently unavailable</p>';
+                    let oddsHtml = '<p>Odds updating...</p>';
                     
-                    // Safely dig into The Odds API complex data structure
-                    try {
-                        if (game.oddsData && game.oddsData.length > 0) {
-                            // Grab the Home/Draw/Away (h2h) odds from the first bookmaker
-                            const market = game.oddsData[0].markets.find(m => m.key === 'h2h');
-                            if (market && market.outcomes) {
-                                oddsHtml = `
-                                    <div class="odds-container">
-                                        ${market.outcomes.map(outcome => `
-                                            <div class="odd-box">
-                                                <span class="odd-label">${outcome.name}</span>
-                                                <span class="odd-value">${outcome.price}</span>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                `;
-                            }
+                    if (game.oddsData && game.oddsData.length > 0) {
+                        const market = game.oddsData[0].markets.find(m => m.key === 'h2h');
+                        if (market && market.outcomes) {
+                            oddsHtml = `
+                                <div class="odds-row">
+                                    ${market.outcomes.map(outcome => `
+                                        <button class="odd-btn" onclick="addToBetslip('${game.homeTeam} vs ${game.awayTeam}', '${outcome.name}', ${outcome.price})">
+                                            <span class="odd-name">${outcome.name}</span>
+                                            <span class="odd-price">${outcome.price}</span>
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            `;
                         }
-                    } catch (e) {
-                        console.error("Could not parse odds for a game");
                     }
 
-                    // 3. Format the date to look nice
-                    const matchDate = new Date(game.matchDate).toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    const matchDate = new Date(game.matchDate).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-                    // 4. Assemble the card and put it on the screen
                     const card = document.createElement('div');
                     card.className = 'game-card';
                     card.innerHTML = `
-                        <div class="teams">${game.homeTeam}  vs  ${game.awayTeam}</div>
-                        <div class="details">📅 ${matchDate} &nbsp;|&nbsp; ⚽ ${game.sport}</div>
+                        <div class="match-header">
+                            <span>⚽ ${game.sport}</span>
+                            <span>📅 ${matchDate}</span>
+                        </div>
+                        <div class="teams">
+                            <span>${game.homeTeam}</span>
+                            <span style="color:#94a3b8; font-size:0.8em;">VS</span>
+                            <span>${game.awayTeam}</span>
+                        </div>
                         ${oddsHtml}
                     `;
-                    
-                    listContainer.appendChild(card);
+                    feed.appendChild(card);
                 });
-
             } catch (error) {
-                console.error("Failed to load odds:", error);
-                document.getElementById('odds-list').innerHTML = '<p style="text-align:center; color: #ff5555;">Error connecting to your Main App. Is the server awake?</p>';
+                document.getElementById('games-feed').innerHTML = '<p style="color: #ef4444; text-align:center;">Error connecting to servers.</p>';
             }
         }
 
-        // Run the function immediately when the page opens
+        // The Bet Calculator Engine
+        function addToBetslip(match, pick, price) {
+            currentBet = { match, pick, price };
+            
+            const slipItems = document.getElementById('slip-items');
+            slipItems.innerHTML = `
+                <div class="selected-bet">
+                    <div class="bet-match">${match}</div>
+                    <div class="bet-pick">
+                        <span>Pick: ${pick}</span>
+                        <span style="color:#10b981;">${price}</span>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('total-odds').innerText = price.toFixed(2);
+            calculateWin();
+        }
+
+        function calculateWin() {
+            if (!currentBet) return;
+            const stake = document.getElementById('stake').value;
+            const win = (stake * currentBet.price).toFixed(2);
+            document.getElementById('potential-win').innerText = '$' + win;
+        }
+
+        // Start the engine
         fetchOdds();
     </script>
 </body>
