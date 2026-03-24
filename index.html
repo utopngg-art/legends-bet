@@ -19,15 +19,13 @@
 
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-main); color: var(--text-main); margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Header */
         header { background-color: #0b1120; padding: 15px 30px; border-bottom: 1px solid var(--border); z-index: 100; }
         .logo { font-size: 1.8em; font-weight: 900; color: var(--accent); letter-spacing: 1px; }
         .logo span { color: white; }
         
-        /* 3-Column App Layout */
         .app-container { display: flex; flex: 1; overflow: hidden; }
 
-        /* Left Sidebar: Sports Categories */
+        /* Left Sidebar */
         .sidebar-left { width: 220px; background-color: #0b1120; border-right: 1px solid var(--border); padding: 20px 0; overflow-y: auto; }
         .sidebar-title { color: var(--text-sub); font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; padding: 0 20px; }
         .sport-menu { list-style: none; padding: 0; margin: 0; }
@@ -35,7 +33,7 @@
         .sport-menu li:hover { background-color: var(--bg-hover); }
         .sport-menu li.active { border-left-color: var(--accent); background-color: var(--bg-hover); color: var(--accent); }
 
-        /* Middle Feed: Games */
+        /* Middle Feed */
         .feed { flex: 1; padding: 30px; overflow-y: auto; background-color: var(--bg-main); }
         .feed-title { margin-top: 0; margin-bottom: 25px; font-size: 1.5em; border-bottom: 2px solid var(--border); padding-bottom: 10px;}
         
@@ -44,15 +42,20 @@
         .teams { font-size: 1.2em; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
         
         .market-title { font-size: 0.85em; color: var(--text-sub); margin-bottom: 8px; text-align: center; }
-        .odds-row { display: flex; gap: 10px; margin-bottom: 15px; }
-        .odd-btn { flex: 1; background-color: #0f172a; border: 1px solid #334155; padding: 12px; border-radius: 8px; color: white; cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center;}
-        .odd-btn:hover { border-color: var(--accent); }
+        .odds-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .odd-btn { flex: 1; background-color: #0f172a; border: 1px solid #334155; padding: 12px; border-radius: 8px; color: white; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px;}
+        .odd-btn:hover { border-color: var(--accent); background-color: #1e293b;}
         .odd-btn.selected { background-color: var(--accent); border-color: var(--accent); color: #000; }
         .odd-btn.selected .odd-name, .odd-btn.selected .odd-price { color: #000; }
-        .odd-name { color: var(--text-sub); font-size: 0.9em; pointer-events: none;}
-        .odd-price { font-weight: bold; font-size: 1.1em; color: var(--accent); pointer-events: none;}
+        .odd-name { color: var(--text-sub); font-size: 0.85em; pointer-events: none; text-align: center;}
+        .odd-price { font-weight: bold; font-size: 1.2em; color: var(--accent); pointer-events: none;}
 
-        /* Right Sidebar: Betslip */
+        /* Expand Markets Button */
+        .expand-btn { width: 100%; background: none; border: none; color: var(--text-sub); padding: 10px; cursor: pointer; font-size: 0.9em; border-top: 1px solid var(--border); margin-top: 10px; transition: 0.2s; }
+        .expand-btn:hover { color: white; }
+        .extra-markets { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border); }
+
+        /* Right Sidebar (Betslip) */
         .sidebar-right { width: 320px; background-color: var(--bg-card); border-left: 1px solid var(--border); display: flex; flex-direction: column; }
         .betslip-header { padding: 20px; background-color: #0b1120; border-bottom: 1px solid var(--border); margin: 0; font-size: 1.2em; text-align: center; font-weight: bold;}
         
@@ -87,16 +90,16 @@
             <div class="sidebar-title">Sports</div>
             <ul class="sport-menu">
                 <li class="active">⚽ Football (Soccer)</li>
-                <li onclick="alert('We will connect basketball data next!')">🏀 Basketball</li>
-                <li onclick="alert('We will connect tennis data next!')">🎾 Tennis</li>
-                <li onclick="alert('We will connect volleyball data next!')">🏐 Volleyball</li>
-                <li onclick="alert('We will connect rugby data next!')">🏈 Rugby</li>
+                <li onclick="alert('Worker update needed for Basketball!')">🏀 Basketball</li>
+                <li onclick="alert('Worker update needed for Tennis!')">🎾 Tennis</li>
+                <li onclick="alert('Worker update needed for Volleyball!')">🏐 Volleyball</li>
+                <li onclick="alert('Worker update needed for Rugby!')">🏈 Rugby</li>
             </ul>
         </div>
 
         <div class="feed" id="games-feed">
             <h2 class="feed-title">Live Matches</h2>
-            <p style="text-align:center; color: #94a3b8; margin-top: 40px;">Loading live odds from your secure server...</p>
+            <p style="text-align:center; color: #94a3b8; margin-top: 40px;">Loading secure odds...</p>
         </div>
 
         <div class="sidebar-right">
@@ -123,15 +126,13 @@
                     <span>Potential Win:</span>
                     <span id="potential-win" class="win-amount">$0.00</span>
                 </div>
-                <button id="place-btn" class="place-bet-btn" disabled onclick="alert('Parlay placed successfully! (Demo)')">Place Bet</button>
+                <button id="place-btn" class="place-bet-btn" disabled onclick="alert('Parlay placed! (Demo)')">Place Bet</button>
             </div>
         </div>
     </div>
 
     <script>
         const API_URL = 'https://main-betting-app.onrender.com/api/odds';
-        
-        // PARLAY ENGINE: This array holds MULTIPLE bets!
         let betslip = []; 
 
         async function fetchOdds() {
@@ -147,22 +148,59 @@
 
                 games.forEach(game => {
                     let h2hHtml = '<p style="text-align:center; color:#555;">Odds locked</p>';
+                    let extraMarketsHtml = '<p style="text-align:center; color: var(--accent); font-size: 0.9em;">Awaiting backend update for Over/Under markets...</p>';
                     let matchTitle = `${game.homeTeam} vs ${game.awayTeam}`;
-                    let safeMatchId = matchTitle.replace(/[^a-zA-Z0-9]/g, ""); // Create a safe ID for buttons
+                    let safeMatchId = matchTitle.replace(/[^a-zA-Z0-9]/g, ""); 
                     
                     if (game.oddsData && game.oddsData.length > 0) {
-                        // 1x2 Market
                         const h2h = game.oddsData[0].markets.find(m => m.key === 'h2h');
                         if (h2h && h2h.outcomes) {
-                            h2hHtml = `
-                                <div class="market-title">Match Winner (1 X 2)</div>
+                            
+                            // 🔥 THE FIX: Force the array to sort Home -> Draw -> Away
+                            const homeOutcome = h2h.outcomes.find(o => o.name === game.homeTeam);
+                            const drawOutcome = h2h.outcomes.find(o => o.name === 'Draw');
+                            const awayOutcome = h2h.outcomes.find(o => o.name === game.awayTeam);
+                            
+                            // Only build the row if we actually found the odds
+                            if(homeOutcome && drawOutcome && awayOutcome) {
+                                const sortedOutcomes = [
+                                    { ...homeOutcome, label: "1 (Home)" }, 
+                                    { ...drawOutcome, label: "X (Draw)" }, 
+                                    { ...awayOutcome, label: "2 (Away)" }
+                                ];
+
+                                h2hHtml = `
+                                    <div class="market-title">Match Winner</div>
+                                    <div class="odds-row">
+                                        ${sortedOutcomes.map(outcome => {
+                                            let safePickId = outcome.name.replace(/[^a-zA-Z0-9]/g, "");
+                                            let btnId = `btn-${safeMatchId}-${safePickId}`;
+                                            return `
+                                            <button id="${btnId}" class="odd-btn" onclick="toggleBet('${matchTitle}', '${outcome.name}', ${outcome.price}, '${btnId}')">
+                                                <span class="odd-name">${outcome.label}<br/><b>${outcome.name}</b></span>
+                                                <span class="odd-price">${outcome.price}</span>
+                                            </button>
+                                            `;
+                                        }).join('')}
+                                    </div>
+                                `;
+                            }
+                        }
+
+                        // 🔥 CHECK FOR TOTALS (Over/Under)
+                        // This will remain blank until we update the Demo Worker!
+                        const totals = game.oddsData[0].markets.find(m => m.key === 'totals');
+                        if (totals && totals.outcomes) {
+                            extraMarketsHtml = `
+                                <div class="market-title">Total Goals (Over/Under 2.5)</div>
                                 <div class="odds-row">
-                                    ${h2h.outcomes.map(outcome => {
-                                        let safePickId = outcome.name.replace(/[^a-zA-Z0-9]/g, "");
+                                    ${totals.outcomes.map(outcome => {
+                                        let pickName = `${outcome.name} ${outcome.point}`;
+                                        let safePickId = pickName.replace(/[^a-zA-Z0-9]/g, "");
                                         let btnId = `btn-${safeMatchId}-${safePickId}`;
                                         return `
-                                        <button id="${btnId}" class="odd-btn" onclick="toggleBet('${matchTitle}', '${outcome.name}', ${outcome.price}, '${btnId}')">
-                                            <span class="odd-name">${outcome.name}</span>
+                                        <button id="${btnId}" class="odd-btn" onclick="toggleBet('${matchTitle}', '${pickName}', ${outcome.price}, '${btnId}')">
+                                            <span class="odd-name">${outcome.name} ${outcome.point}</span>
                                             <span class="odd-price">${outcome.price}</span>
                                         </button>
                                         `;
@@ -180,6 +218,11 @@
                         <div class="match-header"><span>⚽ ${game.sport}</span><span>📅 ${matchDate}</span></div>
                         <div class="teams"><span>${game.homeTeam}</span><span style="color:#94a3b8; font-size:0.8em;">VS</span><span>${game.awayTeam}</span></div>
                         ${h2hHtml}
+                        
+                        <button class="expand-btn" onclick="toggleExtraMarkets('${safeMatchId}')">More Bets 🔽</button>
+                        <div id="extra-${safeMatchId}" class="extra-markets">
+                            ${extraMarketsHtml}
+                        </div>
                     `;
                     feed.appendChild(card);
                 });
@@ -188,24 +231,28 @@
             }
         }
 
-        // --- THE PARLAY LOGIC ---
+        // --- UI LOGIC ---
+        function toggleExtraMarkets(matchId) {
+            const div = document.getElementById(`extra-${matchId}`);
+            if(div.style.display === 'block') {
+                div.style.display = 'none';
+            } else {
+                div.style.display = 'block';
+            }
+        }
+
+        // --- PARLAY LOGIC ---
         function toggleBet(match, pick, price, btnId) {
-            // Check if this match is already in the betslip
             const existingIndex = betslip.findIndex(b => b.match === match);
-            
             if (existingIndex > -1) {
-                // If they clicked the exact same bet, remove it
                 if (betslip[existingIndex].pick === pick) {
                     betslip.splice(existingIndex, 1);
                 } else {
-                    // If they picked a different team in the same match, swap it!
                     betslip[existingIndex] = { match, pick, price, btnId };
                 }
             } else {
-                // Add brand new bet to the parlay array
                 betslip.push({ match, pick, price, btnId });
             }
-            
             updateUI();
         }
 
@@ -215,21 +262,17 @@
         }
 
         function updateUI() {
-            // 1. Reset all buttons visually
             document.querySelectorAll('.odd-btn').forEach(btn => btn.classList.remove('selected'));
-            
-            // 2. Highlight selected buttons
             betslip.forEach(bet => {
                 const activeBtn = document.getElementById(bet.btnId);
                 if(activeBtn) activeBtn.classList.add('selected');
             });
 
-            // 3. Render the Betslip
             const slipContainer = document.getElementById('slip-items');
             if (betslip.length === 0) {
                 slipContainer.innerHTML = '<div class="empty-slip">Your betslip is empty.<br>Click on odds to build your parlay!</div>';
                 document.getElementById('total-odds').innerText = "0.00";
-                document.getElementById('bet-type').innerText = "None";
+                document.getElementById('bet-type').innerText = "Single";
                 document.getElementById('place-btn').disabled = true;
                 calculateWin();
                 return;
@@ -246,13 +289,10 @@
                 </div>
             `).join('');
 
-            // 4. Calculate Parlay Math (Multiply all odds together)
             let totalOdds = betslip.reduce((total, bet) => total * bet.price, 1);
-            
             document.getElementById('total-odds').innerText = totalOdds.toFixed(2);
             document.getElementById('bet-type').innerHTML = betslip.length > 1 ? `<span class="parlay-badge">${betslip.length}-Leg Parlay</span>` : 'Single';
             document.getElementById('place-btn').disabled = false;
-            
             calculateWin();
         }
 
