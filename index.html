@@ -135,12 +135,12 @@
         </div>
     </div>
 
-    <script>
+   <script>
         // Carousel Logic
         let currentSlide = 0;
         const slides = document.querySelectorAll('.carousel-slide');
         setInterval(() => {
-            slides[currentSlide].classList.remove('active');
+            slides.forEach(slide => slide.classList.remove('active')); // Fixed the overlapping text glitch!
             currentSlide = (currentSlide + 1) % slides.length;
             slides[currentSlide].classList.add('active');
         }, 5000);
@@ -159,31 +159,48 @@
                     feed.innerHTML = '<p style="text-align:center;">No live games available.</p>'; return;
                 }
 
-               // 🔥 1. FILTER: Only keep games happening in the next 30 days
+                // 1. FILTER: 30 days out
                 const now = new Date();
                 const futureDate = new Date();
-                futureDate.setDate(now.getDate() + 30); // Changed from 7 to 30!
+                futureDate.setDate(now.getDate() + 30);
                 
                 const validGames = allGames.filter(game => {
                     const matchDate = new Date(game.matchDate);
                     return matchDate >= now && matchDate <= futureDate;
                 });
 
-                // 🔥 2. GROUP: Organize games into folders by League (sport)
-                const leagues = {};
+                // 🔥 2. GROUP: Pre-build the famous folders!
+                const leagues = {
+                    'Champions League': [],
+                    'Premier League (EPL)': [],
+                    'La Liga (Spain)': [],
+                    'Serie A (Italy)': [],
+                    'Bundesliga (Germany)': [],
+                    'Ligue 1 (France)': []
+                };
+
+                // Sort the actual games into the correct folders
                 validGames.forEach(game => {
-                    const leagueName = game.sport || 'Other Soccer';
+                    let leagueName = game.sport;
+                    
+                    // Translate raw API names to our beautiful folder names
+                    if (leagueName === 'soccer_epl') leagueName = 'Premier League (EPL)';
+                    if (leagueName === 'soccer_uefa_champs_league') leagueName = 'Champions League';
+                    if (leagueName === 'soccer_spain_la_liga') leagueName = 'La Liga (Spain)';
+                    if (leagueName === 'soccer_italy_serie_a') leagueName = 'Serie A (Italy)';
+                    if (leagueName === 'soccer_germany_bundesliga') leagueName = 'Bundesliga (Germany)';
+                    if (leagueName === 'soccer_france_ligue_one') leagueName = 'Ligue 1 (France)';
+
                     if (!leagues[leagueName]) leagues[leagueName] = [];
                     leagues[leagueName].push(game);
                 });
 
-                // 🔥 3. RENDER: Build the League Accordions
-                let isFirstLeague = true; // Auto-open the very first league
+                // 3. RENDER
+                let isFirstLeague = true; 
                 
                 for (const [leagueName, leagueGames] of Object.entries(leagues)) {
                     let safeLeagueId = leagueName.replace(/[^a-zA-Z0-9]/g, "");
                     
-                    // Create the League Header (Accordion button)
                     const leagueHTML = `
                         <div class="league-section">
                             <div id="header-${safeLeagueId}" class="league-header ${isFirstLeague ? 'active' : ''}" onclick="toggleLeague('${safeLeagueId}')">
@@ -191,14 +208,14 @@
                                 <span>${leagueGames.length} Matches 🔽</span>
                             </div>
                             <div id="games-${safeLeagueId}" class="league-games" style="display: ${isFirstLeague ? 'block' : 'none'};">
-                                </div>
+                                ${leagueGames.length === 0 ? '<p style="text-align:center; color: #94a3b8; padding: 20px;">No upcoming matches currently available in this league.</p>' : ''}
+                            </div>
                         </div>
                     `;
                     feed.insertAdjacentHTML('beforeend', leagueHTML);
                     
                     const gamesContainer = document.getElementById(`games-${safeLeagueId}`);
 
-                    // Build the individual game cards inside the folder
                     leagueGames.forEach(game => {
                         let h2hHtml = '<p style="text-align:center; color:#555;">Odds locked</p>';
                         let extraMarketsHtml = '<p style="text-align:center; color: var(--text-sub); font-size: 0.9em;">Over/Under odds not yet released.</p>';
@@ -256,24 +273,22 @@
                         gamesContainer.appendChild(card);
                     });
 
-                    isFirstLeague = false; // Only the first league stays open
+                    isFirstLeague = false; 
                 }
             } catch (error) {
                 document.getElementById('games-feed').innerHTML = '<p style="color: #ef4444; text-align:center;">Error connecting to servers.</p>';
             }
         }
 
-        // 🔥 THE NEW ACCORDION LOGIC
+        // Accordion Logic
         function toggleLeague(leagueId) {
             const content = document.getElementById(`games-${leagueId}`);
             const header = document.getElementById(`header-${leagueId}`);
             const isOpen = content.style.display === 'block';
 
-            // Close all folders
             document.querySelectorAll('.league-games').forEach(el => el.style.display = 'none');
             document.querySelectorAll('.league-header').forEach(el => el.classList.remove('active'));
 
-            // If the folder we clicked was closed, open it!
             if (!isOpen) {
                 content.style.display = 'block';
                 header.classList.add('active');
@@ -285,6 +300,7 @@
             div.style.display = div.style.display === 'block' ? 'none' : 'block';
         }
 
+        // Betslip Logic
         function toggleBet(match, pick, price, btnId) {
             const existingIndex = betslip.findIndex(b => b.match === match);
             if (existingIndex > -1) {
